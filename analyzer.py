@@ -1,30 +1,39 @@
+"""
+Логика анализа текста с учетом морфологии.
+Ищет целевые слова и их формы в тексте.
+"""
+
 import re
 from typing import List, Dict
 from pymorphy3 import MorphAnalyzer
-from config import TARGET_WORDS
+from config import TARGET_WORDS, WORDS_LEMMA
+from razdel import tokenize
 
 class TextAnalyzer:
-    """Анализатор текста для поиска целевых слов"""
     
     def __init__(self, target_words: List[str]):
         self.morph = MorphAnalyzer()
         self.target_words = set(word.lower() for word in target_words)
+        self.words_lemma: Dict[str, str] = WORDS_LEMMA
         self.cache = {}  # Кэш для ускорения
         
     def normalize_word(self, word: str) -> str:
-        """Приводит слово к нормальной форме (лемме)"""
+        """Приводит слово к начальной форме (напр. ед.ч., именит. падеж для сущ.)"""
         word_lower = word.lower()
         
         if word_lower in self.cache:
             return self.cache[word_lower]
         
-        try:
-            parsed = self.morph.parse(word_lower)[0]
-            normal_form = parsed.normal_form
-            self.cache[word_lower] = normal_form
-            return normal_form
-        except:
-            return word_lower
+        if word_lower in self.words_lemma:
+                print("Слово найдено в нашем словаре:", word_lower, "->", self.words_lemma[word_lower])
+                normal_form = self.words_lemma[word_lower].lower()
+        else:
+            parsed = self.morph.parse(word_lower)
+            print("Ищем слово в pymorphy3:", word_lower, "->", parsed[0].normal_form)
+            normal_form = parsed[0].normal_form.lower() if parsed else word_lower
+
+        self.cache[word_lower] = normal_form
+        return normal_form
     
     def is_target_word(self, word: str) -> bool:
         """Проверяет, является ли слово формой целевого слова"""
@@ -52,13 +61,14 @@ class TextAnalyzer:
                 "total": 0,
                 "unique": 0
             }
-        
-        # Находим все слова в тексте с позициями
+
+        # Находим все слова в тексте с позициями (razdel возвращает start/end и текст токена)
         matches = []
-        for match in re.finditer(r'[а-яА-ЯёЁa-zA-Z]+', text):
-            word = match.group()
-            start, end = match.span()
-            
+        for token in tokenize(text):
+            word = token.text
+            start = token.start
+            end = token.stop
+
             if self.is_target_word(word):
                 matches.append({
                     "word": word,
@@ -76,7 +86,7 @@ class TextAnalyzer:
             word = match["word"]
             start, end = match["start"], match["end"]
             # Жирный текст для Telegram (используем MarkdownV2)
-            highlighted_word = f"**{word}**"
+            highlighted_word = f"*{word}*"
             highlighted_text = highlighted_text[:start] + highlighted_word + highlighted_text[end:]
         
         # Считаем статистику

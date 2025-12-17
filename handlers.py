@@ -1,9 +1,15 @@
+"""
+Обработчики команд и сообщений для Telegram бота.
+Содержит функции для команд /start, /help, /words, /example,
+обработку кнопок и текстовых сообщений.
+"""
+
 import logging
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, CallbackContext
 from config import TARGET_WORDS, MAX_TEXT_LENGTH, logger
-from analyzer import TextAnalyzer
+from analyzer import analyzer
 
 def create_keyboard() -> ReplyKeyboardMarkup:
     """Создает клавиатуру для бота"""
@@ -179,7 +185,7 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     try:
         # Анализируем текст
-        result = TextAnalyzer.analyze_text(text)
+        result = analyzer.analyze_text(text)
         
         # Если ничего не найдено
         if result["total"] == 0:
