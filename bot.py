@@ -40,11 +40,10 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("words", words_command))
-    application.add_handler(CommandHandler("example", example_command))
     
     # Обработчик кнопок (текст совпадает с кнопками)
     application.add_handler(MessageHandler(
-        filters.TEXT & ~filters.COMMAND & filters.Regex(r'^(📝|ℹ️|📋|🚀|🧹)'),
+        filters.TEXT & ~filters.COMMAND & filters.Regex(r'^(📝|ℹ️|📋)'),
         handle_button
     ))
     
