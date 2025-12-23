@@ -3,6 +3,9 @@
 Настраивает и запускает бота с обработчиками команд и сообщений.
 """
 
+#TODO: Пофиксить парсинг текста из сообщений, в которых есть медиа (картинки, файлы и т.д.)
+#TODO: Добавить фичу с анализом ссылок в тексте: открывать ссылку, сравнивать с бан-листом
+
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import (
@@ -17,7 +20,6 @@ from handlers import (
     start_command,
     help_command,
     words_command,
-    example_command,
     handle_button,
     handle_text_message,
     error_handler,
