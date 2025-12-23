@@ -86,7 +86,7 @@ class TextAnalyzer:
             word = match["word"]
             start, end = match["start"], match["end"]
             # Жирный текст для Telegram (используем MarkdownV2)
-            highlighted_word = f"*{word}*"
+            highlighted_word = f"_{word}_"
             highlighted_text = highlighted_text[:start] + highlighted_word + highlighted_text[end:]
         
         # Считаем статистику
