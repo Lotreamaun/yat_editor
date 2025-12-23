@@ -15,8 +15,7 @@ def create_keyboard() -> ReplyKeyboardMarkup:
     """Создает клавиатуру для бота"""
     keyboard = [
         ["📝 Анализировать текст"],
-        ["ℹ️ Помощь", "📋 Слова"],
-        ["🚀 Пример", "🧹 Очистить"]
+        ["ℹ️ Помощь", "📋 Слова"]
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, selective=True)
 
@@ -144,17 +143,6 @@ async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     
     elif text == "📋 Слова":
         await words_command(update, context)
-    
-    elif text == "🚀 Пример":
-        await example_command(update, context)
-    
-    elif text == "🧹 Очистить":
-        # Очищаем контекст пользователя
-        context.user_data.clear()
-        await update.message.reply_text(
-            "✅ История очищена. Можно отправлять новый текст!",
-            reply_markup=create_keyboard()
-        )
 
 async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает текстовые сообщения (анализирует текст)"""
@@ -173,9 +161,6 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
             parse_mode=ParseMode.MARKDOWN
         )
         return
-    
-    # Сохраняем текст в контексте (для возможного использования в будущем)
-    context.user_data['last_text'] = text
     
     # Отправляем сообщение о начале обработки
     processing_msg = await update.message.reply_text(
