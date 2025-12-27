@@ -166,10 +166,10 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
             result["highlighted"],
             parse_mode=ParseMode.MARKDOWN
         )
+        
         """
         Блок кода для отправки статистики
-        Пока отключил, чтобы не перегружать ответ
-
+        """
         # Формируем и отправляем статистику
         stats_text = "📊 **Статистика:**\n\n"
         
@@ -190,7 +190,6 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
             stats_text,
             parse_mode=ParseMode.MARKDOWN
         )
-        """
 
         # Удаляем сообщение об обработке
         await processing_msg.delete()
