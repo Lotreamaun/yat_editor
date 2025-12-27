@@ -8,6 +8,7 @@ import logging
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, CallbackContext
+from typing import Optional
 from config import TARGET_WORDS, MAX_TEXT_LENGTH, logger
 from analyzer import analyzer
 
@@ -108,11 +109,33 @@ async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     elif text == "📋 Слова":
         await words_command(update, context)
 
+def get_incoming_text(update: Update) -> Optional[str]:
+    """
+    Извлекает текст из входящего сообщения:
+
+    Функция принимает аргумент update (содержит информацию о сообщении)
+    и вощвращает текст из сообщения или caption, если сообщение содержит медиа
+    Optional[str] означает, что функция может вернуть строку или None
+
+    Логика:
+    - Если сообщение содержит caption, возвращаем его
+    - Иначе возвращаем текст сообщения
+    - Если нет текста и caption, возвращаем None
+    """
+    msg = update.message
+    if not msg:
+        return None
+    return msg.caption if msg.caption else msg.text
+
 async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает текстовые сообщения (анализирует текст)"""
     user = update.effective_user
-    text = update.message.text
+    text = get_incoming_text(update)
     
+    if not text:
+        """Если нет текста — ничего не отвечаем"""
+        return
+
     logger.info(f"Пользователь {user.username} ({user.id}) отправил текст: {text[:50]}...")
     
     # Проверяем длину текста

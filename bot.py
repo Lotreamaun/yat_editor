@@ -3,7 +3,6 @@
 Настраивает и запускает бота с обработчиками команд и сообщений.
 """
 
-#TODO: Пофиксить парсинг текста из сообщений, в которых есть медиа (картинки, файлы и т.д.)
 #TODO: Добавить фичу с анализом ссылок в тексте: открывать ссылку, сравнивать с бан-листом
 
 from dotenv import load_dotenv
@@ -49,9 +48,10 @@ def main() -> None:
         handle_button
     ))
     
+    text_or_capture_filter = filters.TEXT | filters.CAPTION
     # Обработчик текстовых сообщений (для анализа)
     application.add_handler(MessageHandler(
-        filters.TEXT & ~filters.COMMAND,
+        text_or_capture_filter & ~filters.COMMAND,
         handle_text_message
     ))
     
