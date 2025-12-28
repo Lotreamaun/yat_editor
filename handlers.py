@@ -15,7 +15,7 @@ from analyzer import analyzer
 def create_keyboard() -> ReplyKeyboardMarkup:
     """Создает клавиатуру для бота"""
     keyboard = [
-        ["📝 Анализировать текст"],
+        ["💬 Анализировать текст"],
         ["ℹ️ Помощь", "📋 Слова"]
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, selective=True)
@@ -34,7 +34,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 - Выделить их в тексте курсивом
 - Показать статистику (в разработке)
 
-📝 *Как пользоваться:*
+ *Как пользоваться:*
 1. Отправьте мне текст или перешлите любое сообщение
 2. Получите результат с выделенными словами
 3. Замените банворды и отправьте текст для перепроверки
