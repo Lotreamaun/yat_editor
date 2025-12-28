@@ -95,10 +95,10 @@ async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     """Обрабатывает нажатия кнопок"""
     text = update.message.text
     
-    if text == "📝 Анализировать текст":
+    if text == "💬 Анализировать текст":
         await update.message.reply_text(
             "*Отправьте текст для анализа*\n\n"
-            "Можно просто написать или вставить текст сообщением. "
+            "Можно просто написать или переслать сообщение из другого чата. "
             f"Максимальная длина: {MAX_TEXT_LENGTH} символов.\n\n"
             "Я найду все целевые слова и выделю их _курсивом_.",
             parse_mode=ParseMode.MARKDOWN
