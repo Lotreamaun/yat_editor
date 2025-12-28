@@ -44,7 +44,7 @@ def main() -> None:
     
     # Обработчик кнопок (текст совпадает с кнопками)
     application.add_handler(MessageHandler(
-        filters.TEXT & ~filters.COMMAND & filters.Regex(r'^(📝|ℹ️|📋)'),
+        filters.TEXT & ~filters.COMMAND & filters.Regex(r'^(💬|ℹ️|📋)'),
         handle_button
     ))
     
