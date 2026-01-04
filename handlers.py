@@ -12,8 +12,6 @@ from typing import Optional
 from config import TARGET_WORDS, MAX_TEXT_LENGTH, logger
 from analyzer import analyzer
 
-#TODO: Добавить "Форматирование" для выбора выделения (Bold, Italic, Underline) (см. issue #1)
-
 def create_keyboard() -> ReplyKeyboardMarkup:
     """Создает клавиатуру для бота"""
     keyboard = [
