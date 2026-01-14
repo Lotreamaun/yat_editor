@@ -13,12 +13,10 @@ from config import TARGET_WORDS, MAX_TEXT_LENGTH, logger
 from analyzer import analyzer
 
 #TODO: Добавить "Форматирование" для выбора выделения (Bold, Italic, Underline) (см. issue #1)
-#TODO: Убрать кнопку "Анализировать текст" и запускать анализ по любому тексту сразу
 
 def create_keyboard() -> ReplyKeyboardMarkup:
     """Создает клавиатуру для бота"""
     keyboard = [
-        ["💬 Анализировать текст"],
         ["ℹ️ Помощь", "📋 Слова"]
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, selective=True)
@@ -98,16 +96,7 @@ async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     """Обрабатывает нажатия кнопок"""
     text = update.message.text
     
-    if text == "💬 Анализировать текст":
-        await update.message.reply_text(
-            "*Отправьте текст для анализа*\n\n"
-            "Можно просто написать или переслать сообщение из другого чата. "
-            f"Максимальная длина: {MAX_TEXT_LENGTH} символов.\n\n"
-            "Я найду все целевые слова и выделю их _курсивом_.",
-            parse_mode=ParseMode.MARKDOWN
-        )
-    
-    elif text == "ℹ️ Помощь":
+    if text == "ℹ️ Помощь":
         await help_command(update, context)
     
     elif text == "📋 Слова":
