@@ -13,6 +13,7 @@ from config import TARGET_WORDS, MAX_TEXT_LENGTH, logger
 from analyzer import analyzer
 
 #TODO: Добавить "Форматирование" для выбора выделения (Bold, Italic, Underline) (см. issue #1)
+#TODO: Убрать кнопку "Анализировать текст" и запускать анализ по любому тексту сразу
 
 def create_keyboard() -> ReplyKeyboardMarkup:
     """Создает клавиатуру для бота"""
@@ -166,10 +167,10 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
             result["highlighted"],
             parse_mode=ParseMode.MARKDOWN
         )
+        
         """
         Блок кода для отправки статистики
-        Пока отключил, чтобы не перегружать ответ
-
+        """
         # Формируем и отправляем статистику
         stats_text = "📊 **Статистика:**\n\n"
         
@@ -190,7 +191,6 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
             stats_text,
             parse_mode=ParseMode.MARKDOWN
         )
-        """
 
         # Удаляем сообщение об обработке
         await processing_msg.delete()
