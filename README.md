@@ -41,15 +41,23 @@ TARGET_WORDS = ["нейронка", "ваше_слово", "другое_сло�
 ## 📁 Структура проекта
 
 ```
-text_analyzer_bot/
-├── bot.py          # Основной код бота
-├── analyzer.py     # Алгоритм анализа текста
-├── config.py       # Настройки и конфигурация
-├── handlers.py     # Инлайн кнопки и ответы бота
-├── requirements.txt # Зависимости Python
-├── .env           # Токен 
-├── .gitignore     
-└── README.md      # Этот файл
+yat_editor/
+├── backend/
+│   ├── Dockerfile
+│   ├── .dockerignore
+│   ├── requirements.txt
+│   └── app/
+│       ├── analyzer/
+│       │   ├── analyzer.py
+│       │   └── llm_yandex.py
+│       ├── bot/
+│       │   ├── bot.py
+│       │   └── handlers.py
+│       └── config/
+│           └── config.py
+├── .env            # TELEGRAM_TOKEN (и другие переменные окружения)
+├── .gitignore
+└── README.md       # Этот файл
 ```
 
 ## 🔧 Стек
