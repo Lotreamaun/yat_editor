@@ -5,9 +5,12 @@
 
 import re
 from typing import List, Dict
+
 from pymorphy3 import MorphAnalyzer
-from config import TARGET_WORDS, WORDS_LEMMA
 from razdel import tokenize
+
+from config.config import TARGET_WORDS, WORDS_LEMMA
+
 
 class TextAnalyzer:
     

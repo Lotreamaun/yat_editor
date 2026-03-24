@@ -5,15 +5,18 @@
 """
 
 import logging
+
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, CallbackContext
 from typing import Optional
-from config import TARGET_WORDS, MAX_TEXT_LENGTH, logger
-from analyzer import analyzer
+
+from config.config import TARGET_WORDS, MAX_TEXT_LENGTH, logger
+from analyzer.analyzer import analyzer
 
 #TODO: Добавить "Форматирование" для выбора выделения (Bold, Italic, Underline) (см. issue #1)
 #TODO: Убрать кнопку "Анализировать текст" и запускать анализ по любому тексту сразу
+
 
 def create_keyboard() -> ReplyKeyboardMarkup:
     """Создает клавиатуру для бота"""
