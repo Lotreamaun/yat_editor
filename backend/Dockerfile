@@ -2,7 +2,8 @@ FROM python:3.9-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONPATH=/app/app
 
 WORKDIR /app
 
@@ -20,4 +21,4 @@ RUN apt-get update && \
 COPY . /app
 
 # Точка входа бота
-CMD ["python3", "bot.py"]
+CMD ["python3", "app/bot/bot.py"]
