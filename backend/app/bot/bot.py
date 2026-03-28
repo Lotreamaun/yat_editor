@@ -14,7 +14,7 @@ from telegram.ext import (
     filters,
 )
 
-from config import TELEGRAM_TOKEN, TARGET_WORDS
+from config.config import TELEGRAM_TOKEN, TARGET_WORDS
 from handlers import (
     start_command,
     help_command,
@@ -24,8 +24,8 @@ from handlers import (
     error_handler,
 )
 
-# Загружаем переменные окружения
-load_dotenv()
+
+load_dotenv()  # Загружаем переменные окружения
 
 def main() -> None:
     """Запускает бота"""
@@ -34,8 +34,7 @@ def main() -> None:
     print(f"🔍 Ищем слова: {', '.join(TARGET_WORDS)}")
     print("=" * 50)
     
-    # Создаем приложение
-    application = Application.builder().token(TELEGRAM_TOKEN).build()
+    application = Application.builder().token(TELEGRAM_TOKEN).build()  # Создаем приложение
     
     # Добавляем обработчики команд
     application.add_handler(CommandHandler("start", start_command))
@@ -49,6 +48,7 @@ def main() -> None:
     ))
     
     text_or_capture_filter = filters.TEXT | filters.CAPTION
+    
     # Обработчик текстовых сообщений (для анализа)
     application.add_handler(MessageHandler(
         text_or_capture_filter & ~filters.COMMAND,
