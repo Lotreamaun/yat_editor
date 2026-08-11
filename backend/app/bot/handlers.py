@@ -11,8 +11,9 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, CallbackContext
 from typing import Optional
 
-from config.config import TARGET_WORDS, MAX_TEXT_LENGTH, logger
+from config.config import TARGET_WORDS, MAX_TEXT_LENGTH, DEFAULT_DEEP_CORRECT, logger
 from analyzer.analyzer import analyzer
+from analyzer.corrector import corrector
 
 #TODO: Добавить "Форматирование" для выбора выделения (Bold, Italic, Underline) (см. issue #1)
 #TODO: Убрать кнопку "Анализировать текст" и запускать анализ по любому тексту сразу
@@ -61,10 +62,11 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 /start - Начать работу
 /help - Показать эту справку
 /words - Показать слова для поиска
+/correct - Включить/выключить глубокую правку (грамматика, пунктуация)
 
 *Как это работает:*
 1. Вы отправляете текст (до {MAX_TEXT_LENGTH} символов)
-2. Я нахожу все формы бан-слов
+2. Я исправляю опечатки и нахожу все формы бан-слов
 3. Возвращаю текст с выделенными _курсивом_ словами
 
 *Пример:*
@@ -96,6 +98,24 @@ async def words_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         parse_mode=ParseMode.MARKDOWN
     )
 
+async def correct_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Переключает глубокую правку текста для пользователя"""
+    user = update.effective_user
+    current = context.user_data.get("deep_correct", DEFAULT_DEEP_CORRECT)
+    new_value = not current
+    context.user_data["deep_correct"] = new_value
+
+    state_text = "включена" if new_value else "выключена"
+    await update.message.reply_text(
+        f"🔧 Глубокая правка: *{state_text}*\n\n"
+        "При включённой правке бот дополнительно исправляет грамматику и пунктуацию "
+        "текста через нейросеть.",
+        parse_mode=ParseMode.MARKDOWN
+    )
+    logger.info(
+        f"Пользователь {user.username} ({user.id}) переключил глубокую правку: {new_value}"
+    )
+
 async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает нажатия кнопок"""
     text = update.message.text
@@ -125,7 +145,7 @@ def get_incoming_text(update: Update) -> Optional[str]:
     return msg.caption if msg.caption else msg.text
 
 async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Обрабатывает текстовые сообщения (анализирует текст)"""
+    """Обрабатывает текстовые сообщения (корректирует и анализирует текст)"""
     user = update.effective_user
     text = get_incoming_text(update)
     
@@ -145,67 +165,73 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
             parse_mode=ParseMode.MARKDOWN
         )
         return
-    
-    # Отправляем сообщение о начале обработки
+
+    deep = context.user_data.get("deep_correct", DEFAULT_DEEP_CORRECT)
+
+    # Сообщение-индикатор: «Исправляю...» при глубокой правке, иначе «Анализирую...»
+    indicator = "🔍 **Исправляю текст...**" if deep else "🔍 **Анализирую текст...**"
     processing_msg = await update.message.reply_text(
-        "🔍 **Анализирую текст...**",
+        indicator,
         parse_mode=ParseMode.MARKDOWN
     )
     
     try:
-        # Анализируем текст
-        result = analyzer.analyze_text(text)
-        
-        # Если ничего не найдено
-        if result["total"] == 0:
+        # Корректируем текст (алгоритм + опционально LLM)
+        result = await corrector.correct_text(text, deep=deep)
+
+        # Подсветка банвордов — по исправленному тексту
+        analysis = analyzer.analyze_text(result.corrected_text)
+
+        # Всегда возвращаем исправленный текст
+        await update.message.reply_text(
+            analysis["highlighted"],
+            parse_mode=ParseMode.MARKDOWN
+        )
+
+        # Пометка о недоступности глубокой правки
+        if result.deep_note:
             await update.message.reply_text(
-                "✅ **Банвордов в тексте не обнаружено**\n\n",
+                f"⚠️ {result.deep_note}",
                 parse_mode=ParseMode.MARKDOWN
             )
-            await processing_msg.delete()
-            return
-        
-        # Отправляем обработанный текст
-        await update.message.reply_text(
-            result["highlighted"],
-            parse_mode=ParseMode.MARKDOWN
-        )
-        
-        """
-        Блок кода для отправки статистики
-        """
-        # Формируем и отправляем статистику
-        stats_text = "📊 **Статистика:**\n\n"
-        
-        # Сортируем слова по количеству найденных
-        sorted_stats = sorted(
-            result["stats"].items(),
-            key=lambda x: x[1],
-            reverse=True
-        )
-        
-        for word, count in sorted_stats:
-            stats_text += f"• **{word}**: {count}\n"
-        
-        stats_text += f"\n**Всего найдено:** {result['total']} слов\n"
-        stats_text += f"**Уникальных слов:** {result['unique']}"
-        
-        await update.message.reply_text(
-            stats_text,
-            parse_mode=ParseMode.MARKDOWN
-        )
+
+        # Статистика банвордов — отдельным сообщением
+        if analysis["total"] > 0:
+            stats_text = "📊 **Статистика:**\n\n"
+            sorted_stats = sorted(
+                analysis["stats"].items(),
+                key=lambda x: x[1],
+                reverse=True
+            )
+            for word, count in sorted_stats:
+                stats_text += f"• **{word}**: {count}\n"
+            stats_text += f"\n**Всего найдено:** {analysis['total']} слов\n"
+            stats_text += f"**Уникальных слов:** {analysis['unique']}"
+
+            await update.message.reply_text(
+                stats_text,
+                parse_mode=ParseMode.MARKDOWN
+            )
+        else:
+            await update.message.reply_text(
+                "✅ **Банвордов в тексте не обнаружено**",
+                parse_mode=ParseMode.MARKDOWN
+            )
 
         # Удаляем сообщение об обработке
         await processing_msg.delete()
         
-        logger.info(f"Пользователь {user.username} - найдено {result['total']} слов")
+        logger.info(
+            f"Пользователь {user.username} - найдено {analysis['total']} слов, "
+            f"правок алгоритма: {result.algo_edits}"
+        )
         
     except Exception as e:
-        logger.error(f"Ошибка при анализе текста: {e}")
+        logger.error(f"Ошибка при обработке текста: {e}")
         
         await processing_msg.delete()
         await update.message.reply_text(
-            "❌ **Произошла ошибка при анализе текста**\n\n"
+            "❌ **Произошла ошибка при обработке текста**\n\n"
             "Попробуйте еще раз или отправьте текст в другом формате.",
             parse_mode=ParseMode.MARKDOWN
         )
