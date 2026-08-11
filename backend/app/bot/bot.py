@@ -19,6 +19,7 @@ from handlers import (
     start_command,
     help_command,
     words_command,
+    correct_command,
     handle_button,
     handle_text_message,
     error_handler,
@@ -34,12 +35,23 @@ def main() -> None:
     print(f"🔍 Ищем слова: {', '.join(TARGET_WORDS)}")
     print("=" * 50)
     
-    application = Application.builder().token(TELEGRAM_TOKEN).build()  # Создаем приложение
+    # Таймауты увеличены: на медленных/нестабильных сетях дефолтные 5 секунд
+    # приводят к таймауту getMe при старте (PTB issue #5021)
+    application = (
+        Application.builder()
+        .token(TELEGRAM_TOKEN)
+        .connect_timeout(30)
+        .read_timeout(30)
+        .write_timeout(30)
+        .pool_timeout(30)
+        .build()
+    )
     
     # Добавляем обработчики команд
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("words", words_command))
+    application.add_handler(CommandHandler("correct", correct_command))
     
     # Обработчик кнопок (текст совпадает с кнопками)
     application.add_handler(MessageHandler(
