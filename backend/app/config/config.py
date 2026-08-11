@@ -50,6 +50,17 @@ WORDS_LEMMA = {
 # Максимальная длина текста (чтобы бот не падал на больших текстах)
 MAX_TEXT_LENGTH = 4000
 
+# Глубокая коррекция (LLM): порог длины текста и дефолт переключателя
+DEEP_CORRECT_MAX_LENGTH = 1000
+DEFAULT_DEEP_CORRECT = False
+
+# Настройки Yandex Cloud LLM (глубокая правка грамматики/пунктуации)
+YANDEX_CLOUD_FOLDER = os.getenv("YANDEX_CLOUD_FOLDER")
+YANDEX_CLOUD_API_KEY = os.getenv("YANDEX_CLOUD_API_KEY")
+YANDEX_CLOUD_MODEL = os.getenv("YANDEX_CLOUD_MODEL", "yandexgpt-lite/latest")
+YANDEX_LLM_BASE_URL = "https://ai.api.cloud.yandex.net/v1"
+YANDEX_LLM_MAX_TOKENS = 1000
+
 # Настройка логирования
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
